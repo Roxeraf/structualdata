@@ -2,20 +2,17 @@ import streamlit as st
 import pandas as pd
 from crewai import Agent, Task, Crew, Process
 from langchain.llms import OpenAI
-from crewai_tools import tool, CSVSearchTool, FileReadTool, DirectoryReadTool
+from crewai_tools import tool
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
 import io
 import os
 
 # Assuming GPT-4.0 mini is accessible via OpenAI's API
-llm = OpenAI(model_name="gpt-4.0-mini", temperature=0.2)
+llm = OpenAI(model_name="gpt-3.5-turbo", temperature=0.2)
 
 # Set up API keys (you should use environment variables in a real application)
 os.environ["OPENAI_API_KEY"] = "Your OpenAI Key"
-
-# Instantiate crewAI tools
-csv_tool = CSVSearchTool()
-file_tool = FileReadTool()
-dir_tool = DirectoryReadTool()
 
 @tool('analyze_data')
 def analyze_data(data: str):
@@ -37,7 +34,7 @@ data_analyst = Agent(
     verbose=True,
     allow_delegation=False,
     llm=llm,
-    tools=[analyze_data, csv_tool, file_tool]
+    tools=[analyze_data]
 )
 
 data_validator = Agent(
@@ -47,28 +44,32 @@ data_validator = Agent(
     verbose=True,
     allow_delegation=False,
     llm=llm,
-    tools=[validate_data, csv_tool, file_tool]
+    tools=[validate_data]
 )
 
 def analyze_file(file, file_type):
     # Read the file based on its type
     if file_type == 'csv':
         df = pd.read_csv(file)
-        csv_path = file.name  # For CSV files, we can use the original file
     else:  # Excel files
         df = pd.read_excel(file)
-        csv_path = "temp.csv"
-        df.to_csv(csv_path, index=False)
+    
+    # Convert dataframe to string for analysis
+    data_str = df.to_string()
+    
+    # Create a vector store from the data
+    embeddings = OpenAIEmbeddings()
+    vector_store = FAISS.from_texts([data_str], embeddings)
     
     # Define tasks
     analysis_task = Task(
-        description=f"Analyze the structural data from the {file_type.upper()} file (saved as {csv_path}). Use the CSVSearchTool to explore the data and provide insights on its structure and potential purpose.",
+        description=f"Analyze the structural data from the {file_type.upper()} file. Provide insights on its structure and potential purpose.",
         agent=data_analyst,
         expected_output='A detailed analysis of the data structure and its potential purpose'
     )
 
     validation_task = Task(
-        description=f"Verify if the structural data from the {file_type.upper()} file (saved as {csv_path}) is correct and consistent. Use the CSVSearchTool to check for inconsistencies or errors in the data.",
+        description=f"Verify if the structural data from the {file_type.upper()} file is correct and consistent. Check for inconsistencies or errors in the data.",
         agent=data_validator,
         expected_output='A validation report highlighting any inconsistencies or errors in the data'
     )
@@ -83,10 +84,6 @@ def analyze_file(file, file_type):
     )
 
     result = crew.kickoff()
-    
-    # Clean up if we created a temporary file
-    if file_type != 'csv':
-        os.remove(csv_path)
     
     return result
 
