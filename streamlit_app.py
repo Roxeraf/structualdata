@@ -2,32 +2,28 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
+from crewai import Agent, Task, Crew, Process
+from langchain.llms import OpenAI
+from crewai_tools import tool, FileReadTool, CSVSearchTool
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
 
-# Initialize OpenAI with the API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Set up API keys
+os.environ["OPENAI_API_KEY"] = "Your OpenAI Key"
 
-# Import Crew AI-related modules
-try:
-    from crewai import Agent, Task, Crew, Process
-    from langchain.llms import OpenAI
-    from crewai_tools import tool
-    from langchain.vectorstores import FAISS
-    from langchain.embeddings import OpenAIEmbeddings
-except ImportError as e:
-    st.error(f"ImportError: {e}")
-    raise e
-
-# Set up the LLM
+# Assuming GPT-4.0 mini is accessible via OpenAI's API
 llm = OpenAI(model_name="gpt-4o-mini", temperature=0.2)
 
-@tool('analyze_data')
+@tool("analyze_data")
 def analyze_data(data: str):
     """Analyze the given data sample and provide insights"""
+    # Placeholder for actual analysis logic
     return f"Analysis of data: {data[:500]}..."  # Truncated for brevity
 
-@tool('validate_data')
+@tool("validate_data")
 def validate_data(data: str):
     """Validate the correctness and consistency of the given data sample"""
+    # Placeholder for actual validation logic
     return f"Validation of data: {data[:500]}... Data appears to be consistent."  # Truncated for brevity
 
 # Define agents
