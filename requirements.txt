@@ -1,4 +1,8 @@
 streamlit
 pandas
-openpyxl
+crewai
+langchain
 openai
+embedchain
+chromadb
+faiss-cpu
