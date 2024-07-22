@@ -4,13 +4,13 @@ import openai
 import os
 
 # Set up OpenAI API key
-openai.api_key = "Your-OpenAI-API-Key"  # Replace with your actual API key
+openai.api_key = os.getenv("OPENAI_API_KEY")  # It's safer to use environment variables for API keys
 
 def analyze_data(data: str):
     """Analyze the given data sample and provide insights"""
     prompt = f"Analyze the following data and provide insights on its structure and potential purpose:\n\n{data}"
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-turbo",
         messages=[
             {"role": "system", "content": "You are a data analyst expert in interpreting complex structural data."},
             {"role": "user", "content": prompt}
@@ -22,7 +22,7 @@ def validate_data(data: str):
     """Validate the correctness and consistency of the given data sample"""
     prompt = f"Validate the following data for correctness and consistency. Highlight any inconsistencies or errors:\n\n{data}"
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-turbo",
         messages=[
             {"role": "system", "content": "You are a data validator expert in checking data quality and accuracy."},
             {"role": "user", "content": prompt}
