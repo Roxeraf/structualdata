@@ -1,8 +1,6 @@
 streamlit
 pandas
-crewai
-langchain
-openai
-embedchain
-chromadb
-faiss-cpu
+seaborn
+matplotlib
+openpyxl
+
