@@ -58,6 +58,15 @@ if uploaded_file is not None:
                 sns.scatterplot(data=data, x=x_col, y=y_col, ax=ax)
                 st.pyplot(fig)
 
+        # Correlation Analysis
+        st.subheader('Correlation Analysis')
+        st.write('Correlation Matrix')
+        corr_matrix = data.corr()
+        st.write(corr_matrix)
+        fig, ax = plt.subplots()
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
+        st.pyplot(fig)
+
         # Custom Analysis
         st.subheader('Custom Analysis')
         st.write('Filter and group data for custom analysis')
@@ -76,5 +85,6 @@ if uploaded_file is not None:
             st.write(grouped_data)
 
 # Run the app with: streamlit run app.py
+
 
 
